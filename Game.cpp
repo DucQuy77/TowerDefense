@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -19,6 +20,11 @@ private:
     vector<Monster> monsters;
     vector<Tower> towers;
     vector<Bullet> bullets;
+
+    //Âm thanh
+    sf::Music bgMusic;
+    sf::SoundBuffer shootBuffer;
+    sf::Sound shootSound;
 
     sf::Clock deltaClock;
     sf::Clock spawnClock;
@@ -79,12 +85,19 @@ private:
             spawnClock.restart();
         }
 
+
         for (auto& m : monsters) {
             m.update(dt, waypoints);
         }
 
+        size_t bulletBefore = bullets.size();
+
         for (auto& t : towers) {
             t.update(monsters, bullets);
+        }
+
+        if (bullets.size() > bulletBefore) {
+            shootSound.play();
         }
 
         for (auto& b : bullets) {
@@ -173,6 +186,17 @@ private:
 public:
     Game() :window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Tower Defense"), economy(300, 50, 100), isGameOver(false){
         window.setFramerateLimit(60);
+
+        if (bgMusic.openFromFile("assets/music/nhacnen.wav")) {
+            bgMusic.setLoop(true);
+            bgMusic.setVolume(40.f);
+            bgMusic.play();
+        }
+
+        if (shootBuffer.loadFromFile("assets/music/tiengsung.wav")) {
+            shootSound.setBuffer(shootBuffer);
+            shootSound.setVolume(70.f);
+        }
 
         waypoints = {
             {50, 100},
